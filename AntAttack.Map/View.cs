@@ -41,7 +41,7 @@ namespace Ant
         {
             using (var image = Render(xShift, yShift))
             {
-                return "data:image/png;base64, " + image.ToBase64String(PngFormat.Instance);
+                return image.ToBase64String(PngFormat.Instance);
             }
         }
 
@@ -120,6 +120,7 @@ namespace Ant
             catch (Exception ex)
             {
                 Console.WriteLine($"{x2d}, {y2d}");
+                Console.WriteLine(ex);
             }
         }
     }

@@ -15,13 +15,15 @@
 }
 else
 {
-    <img @ref="_targetImage" width="800" height="600" >
+    <img @onkeydown="@KeyDown" @ref="_targetImage" tabindex="0" width="800" height="600" />
 }
 
 @code {
     private Map map;
     private View view;
     private ElementReference _targetImage;
+    private int x = 0;
+    private int y = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -31,7 +33,41 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var imageSrc = view.DataUrl(0, 0);
-        await JS.InvokeVoidAsync("setSrc", _targetImage, imageSrc);
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("setFocusToElement", _targetImage);
+            await JS.InvokeVoidAsync("log", "first");
+            await Render();
+        }
+    }
+
+    private async Task Render()
+    {
+        await JS.InvokeVoidAsync("setSrc", _targetImage, view.DataUrl(x, y));
+    }
+
+    private async Task KeyDown(KeyboardEventArgs args)
+    {
+        await JS.InvokeVoidAsync("log", $"do {args.Key}");
+        switch (args.Key)
+        {
+            case "ArrowUp":
+                y--;
+                await Render();
+                break;
+            case "ArrowDown":
+                y++;
+                await Render();
+                break;
+            case "ArrowLeft":
+                x--;
+                await Render();
+                break;
+            case "ArrowRight":
+                x++;
+                await Render();
+                break;
+        }
+        await JS.InvokeVoidAsync("log", $"moved {args.Key}");
     }
 }
