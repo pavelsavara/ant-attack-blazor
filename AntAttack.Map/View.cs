@@ -4,6 +4,7 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
+using System.Threading.Tasks;
 
 namespace Ant
 {
@@ -47,46 +48,34 @@ namespace Ant
 
         private Image Render(int xShift, int yShift)
         {
-            var image = new Image<Rgb24>(widht, height);
+            var image = new Image<Rgb24>(widht + (border * 2), height + (border * 2));
 
             image.Mutate(x => x.Fill(Color.White));
-            for (int z = 0; z < map.MaxZ; z++)
+            image.Mutate(async ctx =>
             {
-                for (int y = 0; y < map.MaxY*2; y++)
+                for (int z = 0; z < map.MaxZ; z++)
                 {
-                    for (int x = 0; x < map.MaxX+xShift; x++)
+                    for (int y = 0; y < map.MaxY; y++)
                     {
+                        for (int x = 0; x < map.MaxX; x++)
+                        {
 
-                        int sx = x + xShift;
-                        int sy = y + yShift;
-                        if (sx < 0 || sx >= map.MaxX || sy < 0 || sy >= map.MaxY)
-                        {
-                            continue;
+                            var cell = map[x, y, z];
+                            if (cell != FieldType.Cube)
+                            {
+                                continue;
+                            }
+                            DrawCube(ctx, z, y, x, xShift, yShift);
                         }
-                        var cell = map[sx, sy, z];
-                        if (cell != FieldType.Cube)
-                        {
-                            continue;
-                        }
-                        DrawCube(image, z, y, x);
                     }
                 }
-            }
-
+            });
+            image.Mutate(i => i.Crop(new Rectangle(border, 32, widht, height)));
 
             return image;
         }
 
-        /*private const int gridA = 16; //18/16/14
-        private const int gridB = 14;
-        private const int gridC = 8;
-        private const int gridD = 7;
-        private const int gridE = 16;
-
-        x = (y * gridE) + ((x) * gridB);
-        y=  (y * gridC) - (x * gridD) - (z * gridA);
-
-        */
+        private const int border = 32;
 
         private const int x2x = 14;
         private const int x2y = 7;
@@ -98,30 +87,30 @@ namespace Ant
         private const int z2y = 16;
 
 
-        private void DrawCube(Image image, int z, int y, int x)
+        private void DrawCube(IImageProcessingContext ctx, int z, int y, int x, int xShift, int yShift)
         {
-            var x2d = (widht / 2) + (x * x2x) - (y * y2x);
-            var y2d = (z2y * map.MaxZ) + (x * x2y) + (y * y2y) - (z * z2y);
+            var x2d = (32 * xShift) + (widht / 2) + (x * x2x) - (y * y2x) + border;
+            var y2d = (32 * yShift) + (8 * z2y) + (x * x2y) + (y * y2y) - (z * z2y) + border;
 
-            if (x2d < 0 || x2d + cube.Width >= widht || y2d < 0 || y2d + cube.Height >= height)
+            if (x2d <= 0 || x2d >= widht  || y2d <= 0 || y2d >= height )
             {
                 return;
             }
 
-            DrawCube(image, x2d, y2d);
+            DrawCube(ctx, x2d, y2d);
         }
 
-        private static void DrawCube(Image image, int x2d, int y2d)
+        private static void DrawCube(IImageProcessingContext ctx, int x2d, int y2d)
         {
-            try
-            {
-                image.Mutate(x => x.DrawImage(cube, new Point(x2d, y2d), 1));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"{x2d}, {y2d}");
-                Console.WriteLine(ex);
-            }
+            //try
+            //{
+                ctx.DrawImage(cube, new Point(x2d, y2d), 1);
+            //}
+            //catch (Exception ex)
+            //{
+                //Console.WriteLine(ex);
+                //Console.WriteLine($"{x2d} {y2d}");
+            //}
         }
     }
 }

@@ -1,10 +1,13 @@
-﻿@page "/"
+﻿@* Pavel Savara 2007 *@
+@* http://zamboch.blogspot.com/ *@
+@* Licensed under LGPL *@
+
+@page "/"
 @inject HttpClient Http
 @inject IJSRuntime JS
 @using Ant
 
 <h1>Ant Attack again</h1>
-
 
 @if (map == null)
 {
@@ -12,8 +15,9 @@
 }
 else
 {
-    <img @onkeydown="@KeyDown" @ref="_targetImage" tabindex="0" width="800" height="600" />
 }
+
+<img @onkeydown="@KeyDown" @ref="_targetImage" tabindex="0" width="800" height="600" />
 
 @code {
     private Map map;
@@ -33,40 +37,56 @@ else
             view = new View(800, 600, map);
             await JS.InvokeVoidAsync("setFocusToElement", _targetImage);
             await JS.InvokeVoidAsync("log", "first");
-            await Render();
+            Render();
         }
     }
 
-    private async Task Render()
+    private void Render()
     {
         if (!running)
         {
             running = true;
-            await JS.InvokeVoidAsync("setSrc", _targetImage, view.DataUrl(x, y));
-            running = false;
+            Task.Run(async () =>
+            {
+                var cx = int.MinValue;
+                var cy = int.MinValue;
+                while (cx != x && cy != y)
+                {
+                    cx = x;
+                    cy = y;
+
+                    var now = DateTime.Now;
+                    await JS.InvokeVoidAsync("log", $"start {now }");
+                    var data = view.DataUrl(cx, cy);
+                    await JS.InvokeVoidAsync("log", $"data {DateTime.Now-now}");
+                    await JS.InvokeVoidAsync("setSrc", _targetImage, data);
+                    await JS.InvokeVoidAsync("log", $"end {DateTime.Now-now}");
+                    await Task.Delay(1);
+                }
+                running = false;
+            });
         }
     }
 
     private async Task KeyDown(KeyboardEventArgs args)
     {
-        await JS.InvokeVoidAsync("log", $"do {args.Key}");
         switch (args.Key)
         {
             case "ArrowUp":
-                y--;
-                await Render();
+                y++;
+                Render();
                 break;
             case "ArrowDown":
-                y++;
-                await Render();
+                y--;
+                Render();
                 break;
             case "ArrowLeft":
-                x--;
-                await Render();
+                x++;
+                Render();
                 break;
             case "ArrowRight":
-                x++;
-                await Render();
+                x--;
+                Render();
                 break;
         }
         await JS.InvokeVoidAsync("log", $"moved {args.Key}");

@@ -29,8 +29,6 @@ namespace Ant
         private readonly int maxy;
         private readonly int maxz;
         private int cubes;
-        private Position man = new Position(53, 121, 0, Direction.North); //125
-        //private Position man = new Position(3, 3, 0, Direction.North); //125
 
         #endregion
 
@@ -40,12 +38,6 @@ namespace Ant
         {
             get { return fields[z, x, y]; }
             set { fields[z, x, y] = value; }
-        }
-
-        public FieldType this[Position pos]
-        {
-            get { return fields[pos.Z, pos.X, pos.Y]; }
-            set { fields[pos.Z, pos.X, pos.Y] = value; }
         }
 
         public int CubesCount
@@ -68,18 +60,6 @@ namespace Ant
             get { return maxy; }
         }
 
-        public Position Man
-        {
-            get { return man; }
-            set { man = value; }
-        }
-
-        public bool IsValid(Position pos)
-        {
-            return
-                !((pos.X < 0 || pos.X >= MaxX || pos.Y < 0 || pos.Y >= MaxY || pos.Z < 0 || pos.Z >= MaxZ) ||
-                  ((this[pos]) != FieldType.Empty));
-        }
 
         #endregion
 
@@ -112,7 +92,7 @@ namespace Ant
                 this[x, y, z] = FieldType.Cube;
                 cnt--;
             }
-            this[man] = FieldType.Man;
+            this[53, 121, 0] = FieldType.Man;
         }
 
         #endregion

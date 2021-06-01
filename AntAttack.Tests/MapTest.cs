@@ -14,24 +14,20 @@ namespace Ant
             Map m = new Map();
             m.LoadMap();
 
-            FieldType fieldType = m[m.Man.X, m.Man.Y, m.Man.Z];
+            FieldType fieldType = m[53, 121, 0];
             Assert.Equal(FieldType.Man, fieldType);
         }
 
         [Theory]
-        [InlineData(-100, 100)]
-        [InlineData(-100, 0)]
-        [InlineData(-100, -100)]
-        [InlineData(0, 100)]
         [InlineData(0, 0)]
-        [InlineData(0, -100)]
-        [InlineData(100, 100)]
-        [InlineData(100, 0)]
-        [InlineData(100, -100)]
+        [InlineData(0, -20)]
+        [InlineData(20, 0)]
+        [InlineData(-20, 0)]
+        [InlineData(20, -20)]
         public void Render(int xShift, int yShift)
         {
             Map map = new Map();
-            var view = new View(800, 600, map);
+            var view = new View(1024, 768, map);
             view.Save("map", xShift, yShift);
         }
 
