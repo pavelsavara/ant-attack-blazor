@@ -1,7 +1,37 @@
 ﻿@page "/"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@using Ant
+@using Blazor.Extensions
+@using Blazor.Extensions.Canvas
+@using Blazor.Extensions.Canvas.Canvas2D
 
-<h1>Hello, world!</h1>
+<h1>Ant Attack again</h1>
 
-Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@if (map == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <img @ref="_targetImage" width="800" height="600" >
+}
+
+@code {
+    private Map map;
+    private View view;
+    private ElementReference _targetImage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        map = new Map();
+        view = new View(800, 600, map);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var imageSrc = view.DataUrl(0, 0);
+        await JS.InvokeVoidAsync("setSrc", _targetImage, imageSrc);
+    }
+}

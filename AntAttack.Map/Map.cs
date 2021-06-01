@@ -11,8 +11,9 @@ namespace Ant
         #region Construction
 
 
-        public Map() : this (128, 128, 8)
+        public Map() : this(128, 128, 8)
         {
+            LoadMap();
         }
 
         public Map(int maxx, int maxy, int maxz)
@@ -23,7 +24,7 @@ namespace Ant
             fields = new FieldType[maxz, maxx, maxy];
         }
 
-        private readonly FieldType[, ,] fields;
+        private readonly FieldType[,,] fields;
         private readonly int maxx;
         private readonly int maxy;
         private readonly int maxz;
@@ -52,17 +53,17 @@ namespace Ant
             get { return cubes; }
         }
 
-        public int MaxZ3
+        public int MaxZ
         {
             get { return maxz; }
         }
 
-        public int MaxX3
+        public int MaxX
         {
             get { return maxx; }
         }
 
-        public int MaxY3
+        public int MaxY
         {
             get { return maxy; }
         }
@@ -76,7 +77,7 @@ namespace Ant
         public bool IsValid(Position pos)
         {
             return
-                !((pos.X < 0 || pos.X >= MaxX3 || pos.Y < 0 || pos.Y >= MaxY3 || pos.Z < 0 || pos.Z >= MaxZ3) ||
+                !((pos.X < 0 || pos.X >= MaxX || pos.Y < 0 || pos.Y >= MaxY || pos.Z < 0 || pos.Z >= MaxZ) ||
                   ((this[pos]) != FieldType.Empty));
         }
 
@@ -86,8 +87,10 @@ namespace Ant
 
         public void LoadMap()
         {
-            Stream stream = typeof(Map).Assembly.GetManifestResourceStream("antescher.pos");
-            LoadMap(stream);
+            using (var stream = typeof(Map).Assembly.GetManifestResourceStream("Ant.antescher.pos"))
+            {
+                LoadMap(stream);
+            }
         }
 
         public void LoadMap(Stream mapStream)
