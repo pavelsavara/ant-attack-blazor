@@ -52,9 +52,9 @@ namespace Ant
             image.Mutate(x => x.Fill(Color.White));
             for (int z = 0; z < map.MaxZ; z++)
             {
-                for (int y = 0; y < map.MaxY; y++)
+                for (int y = 0; y < map.MaxY*2; y++)
                 {
-                    for (int x = 0; x < map.MaxX; x++)
+                    for (int x = 0; x < map.MaxX+xShift; x++)
                     {
 
                         int sx = x + xShift;
@@ -101,7 +101,7 @@ namespace Ant
         private void DrawCube(Image image, int z, int y, int x)
         {
             var x2d = (widht / 2) + (x * x2x) - (y * y2x);
-            var y2d = (height / 2) + (x * x2y) + (y * y2y) - (z * z2y);
+            var y2d = (z2y * map.MaxZ) + (x * x2y) + (y * y2y) - (z * z2y);
 
             if (x2d < 0 || x2d + cube.Width >= widht || y2d < 0 || y2d + cube.Height >= height)
             {

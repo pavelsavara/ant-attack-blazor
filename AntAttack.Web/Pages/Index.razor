@@ -22,16 +22,15 @@ else
     private int x = 0;
     private int y = 0;
 
-    protected override async Task OnInitializedAsync()
-    {
-        map = new Map();
-        view = new View(800, 600, map);
-    }
+    private bool running = false;
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            map = new Map();
+            view = new View(800, 600, map);
             await JS.InvokeVoidAsync("setFocusToElement", _targetImage);
             await JS.InvokeVoidAsync("log", "first");
             await Render();
@@ -40,7 +39,12 @@ else
 
     private async Task Render()
     {
-        await JS.InvokeVoidAsync("setSrc", _targetImage, view.DataUrl(x, y));
+        if (!running)
+        {
+            running = true;
+            await JS.InvokeVoidAsync("setSrc", _targetImage, view.DataUrl(x, y));
+            running = false;
+        }
     }
 
     private async Task KeyDown(KeyboardEventArgs args)
